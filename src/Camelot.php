@@ -4,6 +4,7 @@
 namespace RandomState\Camelot;
 
 
+use RandomState\Camelot\Exceptions\BackgroundLinesNotSupportedException;
 use RandomState\Camelot\Exceptions\PdfEncryptedException;
 use Symfony\Component\Process\Process;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -39,10 +40,18 @@ class Camelot
      */
     protected $password;
 
-    public function __construct($path, $mode = 'lattice')
+    /**
+     * @var string
+     */
+    protected $processBackgroundLines;
+
+    const MODE_LATTICE = 'lattice';
+    const MODE_STREAM = 'stream';
+
+    public function __construct($path, $mode = null)
     {
         $this->path = $path;
-        $this->mode = $mode;
+        $this->mode = $mode ?? static::MODE_LATTICE;
     }
 
     public static function lattice($path)
@@ -52,7 +61,7 @@ class Camelot
 
     public static function stream($path)
     {
-        return new self($path, 'stream');
+        return new self($path, static::MODE_STREAM);
     }
 
     public function pages(string $pages)
@@ -110,17 +119,20 @@ class Camelot
 
     protected function runCommand($outputPath)
     {
-        $mode = $this->mode;
-        $pages = $this->pages ? "--pages {$this->pages}" : "";
-        $password = $this->password ? "--password {$this->password}": "";
-        $cmd = "camelot --format csv --output $outputPath $pages $password $mode " . $this->path;
+        $mode = " {$this->mode}";
+        $pages = $this->pages ? " --pages {$this->pages}" : "";
+        $password = $this->password ? " --password {$this->password}": "";
+
+        $background = $this->processBackgroundLines ? " --process_background ": "";
+
+        $cmd = "camelot --format csv --output $outputPath {$pages}{$password}{$mode}{$background} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
 
         $process->run();
 
         if(!$process->isSuccessful()) {
-            $this->throwError($this->path, $process->getErrorOutput());
+            $this->throwError($this->path, $process->getErrorOutput(), $cmd);
         }
     }
 
@@ -177,12 +189,24 @@ class Camelot
         return $this;
     }
 
-    protected function throwError($path, string $getErrorOutput)
+    protected function throwError($path, string $getErrorOutput, string $cmd)
     {
         if(strpos($getErrorOutput, 'file has not been decrypted') > -1) {
             throw new PdfEncryptedException($path);
         }
 
-        throw new \Exception("Unexpected Camelot error. See output: $getErrorOutput");
+        throw new \Exception("Unexpected Camelot error.\r\nCommand: $cmd\r\nOutput:\r\n-----------\r\n$getErrorOutput");
     }
+
+    public function processBackgroundLines()
+    {
+        if($this->mode !== static::MODE_LATTICE) {
+            throw new BackgroundLinesNotSupportedException($this->mode);
+        }
+
+        $this->processBackgroundLines = true;
+
+        return $this;
+    }
+
 }
