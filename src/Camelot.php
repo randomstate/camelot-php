@@ -11,6 +11,9 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class Camelot
 {
+    const MODE_LATTICE = 'lattice';
+    const MODE_STREAM = 'stream';
+
     /**
      * lattice | stream
      *
@@ -45,8 +48,10 @@ class Camelot
      */
     protected $processBackgroundLines;
 
-    const MODE_LATTICE = 'lattice';
-    const MODE_STREAM = 'stream';
+    /**
+     * @var string
+     */
+    protected $plot;
 
     public function __construct($path, $mode = null)
     {
@@ -117,15 +122,18 @@ class Camelot
         return $output;
     }
 
-    protected function runCommand($outputPath)
+    protected function runCommand($outputPath = null)
     {
+        $output = $outputPath ? " --output $outputPath" : "";
         $mode = " {$this->mode}";
         $pages = $this->pages ? " --pages {$this->pages}" : "";
         $password = $this->password ? " --password {$this->password}": "";
 
+        // Advanced options
         $background = $this->processBackgroundLines ? " --process_background ": "";
+        $plot = $this->plot ? " -plot {$this->plot}" : "";
 
-        $cmd = "camelot --format csv --output $outputPath {$pages}{$password}{$mode}{$background} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$mode}{$background}{$plot} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
 
@@ -205,6 +213,15 @@ class Camelot
         }
 
         $this->processBackgroundLines = true;
+
+        return $this;
+    }
+
+    public function plot($kind = 'text')
+    {
+        $this->plot = $kind;
+
+        $this->runCommand();
 
         return $this;
     }

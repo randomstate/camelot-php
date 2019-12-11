@@ -43,7 +43,7 @@ class ParseExportTest extends TestCase
         Camelot::stream($this->file('health_stream.pdf'))
             ->save(__DIR__ . '/output-custom.txt');
 
-        $this->assertFileExists('output-custom-page-1-table-1.txt');
+        $this->assertFileExists(__DIR__ . '/output-custom-page-1-table-1.txt');
         unlink(__DIR__ . '/output-custom-page-1-table-1.txt');
     }
 
