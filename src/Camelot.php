@@ -4,6 +4,7 @@
 namespace RandomState\Camelot;
 
 
+use RandomState\Camelot\Exceptions\PdfEncryptedException;
 use Symfony\Component\Process\Process;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
@@ -28,6 +29,16 @@ class Camelot
      */
     protected $path;
 
+    /**
+     * @var string
+     */
+    protected $pages;
+
+    /**
+     * @var string
+     */
+    protected $password;
+
     public function __construct($path, $mode = 'lattice')
     {
         $this->path = $path;
@@ -42,6 +53,13 @@ class Camelot
     public static function stream($path)
     {
         return new self($path, 'stream');
+    }
+
+    public function pages(string $pages)
+    {
+        $this->pages = $pages;
+
+        return $this;
     }
 
     public function csv()
@@ -93,13 +111,17 @@ class Camelot
     protected function runCommand($outputPath)
     {
         $mode = $this->mode;
-        $cmd = "camelot --format csv --output $outputPath $mode " . $this->path;
+        $pages = $this->pages ? "--pages {$this->pages}" : "";
+        $password = $this->password ? "--password {$this->password}": "";
+        $cmd = "camelot --format csv --output $outputPath $pages $password $mode " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
 
         $process->run();
 
-//        var_dump($process->getExitCode(), $process->getErrorOutput());
+        if(!$process->isSuccessful()) {
+            $this->throwError($this->path, $process->getErrorOutput());
+        }
     }
 
     public function json()
@@ -138,5 +160,29 @@ class Camelot
     public function getMode()
     {
         return $this->mode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPages()
+    {
+        return $this->pages;
+    }
+
+    public function password($password)
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    protected function throwError($path, string $getErrorOutput)
+    {
+        if(strpos($getErrorOutput, 'file has not been decrypted') > -1) {
+            throw new PdfEncryptedException($path);
+        }
+
+        throw new \Exception("Unexpected Camelot error. See output: $getErrorOutput");
     }
 }

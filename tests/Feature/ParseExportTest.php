@@ -11,10 +11,10 @@ class ParseExportTest extends TestCase
      */
     public function can_set_lattice_mode()
     {
-        $table = Camelot::lattice($this->file('foo_lattice.pdf'))
+        $tables = Camelot::lattice($this->file('foo_lattice.pdf'))
             ->extract()[0];
 
-        $csv = $this->csvFromString($table);
+        $csv = $this->csvFromString($tables);
         $csv->setHeaderOffset(0);
 
         $this->assertCount(7, $csv->getHeader());
@@ -25,10 +25,10 @@ class ParseExportTest extends TestCase
      */
     public function can_set_stream_mode()
     {
-        $table = Camelot::stream($this->file('health_stream.pdf'))
+        $tables = Camelot::stream($this->file('health_stream.pdf'))
             ->extract()[0];
 
-        $csv = $this->csvFromString($table);
+        $csv = $this->csvFromString($tables);
         $csv->setHeaderOffset(1);
 
         $this->assertCount(8, $header = $csv->getHeader());
