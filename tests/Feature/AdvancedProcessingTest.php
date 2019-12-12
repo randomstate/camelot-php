@@ -124,4 +124,21 @@ class AdvancedProcessingTest extends TestCase
 
         $this->assertStringContainsString('Total investment result per unit', $tables[0]);
     }
+
+    /**
+     * @test
+     */
+    public function can_adjust_row_tolerance()
+    {
+        $tables = Camelot::stream($this->file('row_tol.pdf'))
+            ->strip("\n")
+            ->setRowTolerance(10)
+            ->extract();
+
+        $this->assertCount(1, $tables);
+        $csv = $this->csvFromString($tables[0]);
+        $csv->setHeaderOffset(0);
+
+        $this->assertEquals('Nombre Entidad', $csv->getHeader()[1]);
+    }
 }

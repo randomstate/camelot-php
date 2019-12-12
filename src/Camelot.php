@@ -89,6 +89,11 @@ class Camelot
      */
     protected $edgeTolerance;
 
+    /**
+     * @var int
+     */
+    protected $rowTolerance;
+
     public function __construct($path, $mode = null)
     {
         $this->path = $path;
@@ -173,12 +178,13 @@ class Camelot
         $columnSeparators = $this->columnSeparators ? " -C " . implode(",",$this->columnSeparators) : "";
         $strip = $this->unwantedCharacters ? " -strip '{$this->unwantedCharacters}'" : "";
         $edgeTolerance = $this->edgeTolerance ? " -e {$this->edgeTolerance}" : "";
+        $rowTolerance = $this->rowTolerance ? " -r {$this->rowTolerance}" : "";
 
         // Table areas/regions
         $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
         $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$edgeTolerance}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$edgeTolerance}{$rowTolerance}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
         $process->run();
@@ -310,9 +316,16 @@ class Camelot
         return $this;
     }
 
-    public function setEdgeTolerance(int $edgeTolerance = 50)
+    public function setEdgeTolerance(int $edgeTolerance)
     {
         $this->edgeTolerance = $edgeTolerance;
+
+        return $this;
+    }
+
+    public function setRowTolerance(int $rowTolerance)
+    {
+        $this->rowTolerance = $rowTolerance;
 
         return $this;
     }
