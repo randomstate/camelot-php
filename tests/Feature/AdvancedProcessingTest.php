@@ -105,10 +105,23 @@ class AdvancedProcessingTest extends TestCase
     public function strip_characters_from_text() 
     {
         $tables = Camelot::stream($this->file('strip.pdf'))
-            ->strip(' .\n') // space, period or new lines
+            ->strip(" .\n") // space, period or new lines
             ->extract();
 
         $csv = $this->csvFromString($tables[0]);
         $this->assertEquals('Robbery', $csv->fetchOne(12)[0]);
+    }
+
+    /**
+     * @test
+     */
+    public function can_adjust_edge_tolerance()
+    {
+        $tables = Camelot::stream($this->file('edge_tol.pdf'))
+            ->strip("\n")
+            ->setEdgeTolerance(500)
+            ->extract();
+
+        $this->assertStringContainsString('Total investment result per unit', $tables[0]);
     }
 }

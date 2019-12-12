@@ -84,6 +84,11 @@ class Camelot
      */
     protected $unwantedCharacters;
 
+    /**
+     * @var int
+     */
+    protected $edgeTolerance;
+
     public function __construct($path, $mode = null)
     {
         $this->path = $path;
@@ -167,12 +172,13 @@ class Camelot
         $flagSize = $this->flagSize ? " -flag" : "";
         $columnSeparators = $this->columnSeparators ? " -C " . implode(",",$this->columnSeparators) : "";
         $strip = $this->unwantedCharacters ? " -strip '{$this->unwantedCharacters}'" : "";
+        $edgeTolerance = $this->edgeTolerance ? " -e {$this->edgeTolerance}" : "";
 
         // Table areas/regions
         $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
         $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$edgeTolerance}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
         $process->run();
@@ -300,6 +306,13 @@ class Camelot
     public function strip(string $unwantedCharacters)
     {
         $this->unwantedCharacters = $unwantedCharacters;
+
+        return $this;
+    }
+
+    public function setEdgeTolerance(int $edgeTolerance = 50)
+    {
+        $this->edgeTolerance = $edgeTolerance;
 
         return $this;
     }
