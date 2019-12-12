@@ -25,5 +25,6 @@
   "require-dev": {
     "phpunit/phpunit": "^8.5",
     "league/csv": "^9.4"
-  }
+  },
+  "license": "MIT"
 }
