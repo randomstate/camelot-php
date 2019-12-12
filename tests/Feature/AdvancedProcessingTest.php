@@ -141,4 +141,24 @@ class AdvancedProcessingTest extends TestCase
 
         $this->assertEquals('Nombre Entidad', $csv->getHeader()[1]);
     }
+    
+    /**
+     * @test
+     */
+    public function can_set_line_scale() 
+    {
+        $tables = Camelot::lattice($this->file('short_lines.pdf'))
+            ->strip("-\n")
+            ->setLineScale(40)
+            ->extract();
+
+        $this->assertCount(1, $tables);
+        $csv = $this->csvFromString($tables[0]);
+        $csv->setHeaderOffset(0);
+
+        $this->assertEquals('Prevalence', $csv->getHeader()[3]);
+        $this->assertEquals('C.I*', $csv->getHeader()[4]);
+        $this->assertEquals('RelativePrecision', $csv->getHeader()[5]);
+        $this->assertEquals('Sample sizeper State', $csv->getHeader()[6]);
+    }
 }
