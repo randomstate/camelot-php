@@ -79,6 +79,11 @@ class Camelot
      */
     protected $flagSize;
 
+    /**
+     * @var string
+     */
+    protected $unwantedCharacters;
+
     public function __construct($path, $mode = null)
     {
         $this->path = $path;
@@ -161,12 +166,13 @@ class Camelot
         $split = ($this->splitAlongSeparators && $this->columnSeparators) ? " -split" : "";
         $flagSize = $this->flagSize ? " -flag" : "";
         $columnSeparators = $this->columnSeparators ? " -C " . implode(",",$this->columnSeparators) : "";
+        $strip = $this->unwantedCharacters ? " -strip '{$this->unwantedCharacters}'" : "";
 
         // Table areas/regions
         $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
         $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$mode}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
         $process->run();
@@ -287,6 +293,13 @@ class Camelot
     public function flagSize($flag = true)
     {
         $this->flagSize = $flag;
+
+        return $this;
+    }
+
+    public function strip(string $unwantedCharacters)
+    {
+        $this->unwantedCharacters = $unwantedCharacters;
 
         return $this;
     }

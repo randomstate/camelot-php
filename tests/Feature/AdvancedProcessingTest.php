@@ -98,4 +98,17 @@ class AdvancedProcessingTest extends TestCase
         $this->assertStringContainsString('<s>', $csv->fetchOne(18)[2]);
         $this->assertStringContainsString('</s>', $csv->fetchOne(18)[2]);
     }
+    
+    /**
+     * @test
+     */
+    public function strip_characters_from_text() 
+    {
+        $tables = Camelot::stream($this->file('strip.pdf'))
+            ->strip(' .\n') // space, period or new lines
+            ->extract();
+
+        $csv = $this->csvFromString($tables[0]);
+        $this->assertEquals('Robbery', $csv->fetchOne(12)[0]);
+    }
 }
