@@ -53,6 +53,16 @@ class Camelot
      */
     protected $plot;
 
+    /**
+     * @var Areas
+     */
+    protected $areas;
+
+    /**
+     * @var Areas
+     */
+    protected $regions;
+
     public function __construct($path, $mode = null)
     {
         $this->path = $path;
@@ -133,10 +143,13 @@ class Camelot
         $background = $this->processBackgroundLines ? " --process_background ": "";
         $plot = $this->plot ? " -plot {$this->plot}" : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$mode}{$background}{$plot} " . $this->path;
+        // Table areas/regions
+        $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
+        $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
+
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$mode}{$background}{$plot}{$areas}{$regions} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
-
         $process->run();
 
         if(!$process->isSuccessful()) {
@@ -222,6 +235,20 @@ class Camelot
         $this->plot = $kind;
 
         $this->runCommand();
+
+        return $this;
+    }
+
+    public function inAreas(Areas $areas)
+    {
+        $this->areas = $areas;
+
+        return $this;
+    }
+
+    public function inRegions(Areas $regions)
+    {
+        $this->regions = $regions;
 
         return $this;
     }
