@@ -5,6 +5,7 @@ namespace RandomState\Camelot;
 
 
 use RandomState\Camelot\Exceptions\BackgroundLinesNotSupportedException;
+use RandomState\Camelot\Exceptions\ColumnSeparatorsNotSupportedException;
 use RandomState\Camelot\Exceptions\PdfEncryptedException;
 use Symfony\Component\Process\Process;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -63,6 +64,11 @@ class Camelot
      */
     protected $regions;
 
+    /**
+     * @var array
+     */
+    protected $columnSeparators;
+
     public function __construct($path, $mode = null)
     {
         $this->path = $path;
@@ -119,13 +125,13 @@ class Camelot
         $directory = $pathInfo['dirname'];
 
         $files = scandir($directory);
-        $files = array_values(array_filter($files, function($file) use($filename) {
+        $files = array_values(array_filter($files, function ($file) use ($filename) {
             return preg_match("/{$filename}-.*-table-.*\..*/", $file);
         }));
 
         $output = [];
 
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $output[] = $content = file_get_contents($directory . DIRECTORY_SEPARATOR . $file);
         }
 
@@ -137,22 +143,23 @@ class Camelot
         $output = $outputPath ? " --output $outputPath" : "";
         $mode = " {$this->mode}";
         $pages = $this->pages ? " --pages {$this->pages}" : "";
-        $password = $this->password ? " --password {$this->password}": "";
+        $password = $this->password ? " --password {$this->password}" : "";
 
         // Advanced options
-        $background = $this->processBackgroundLines ? " --process_background ": "";
+        $background = $this->processBackgroundLines ? " --process_background " : "";
         $plot = $this->plot ? " -plot {$this->plot}" : "";
+        $columnSeparators = $this->columnSeparators ? " -C " . implode(",",$this->columnSeparators) : "";
 
         // Table areas/regions
         $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
         $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$mode}{$background}{$plot}{$areas}{$regions} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$mode}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
         $process->run();
 
-        if(!$process->isSuccessful()) {
+        if (!$process->isSuccessful()) {
             $this->throwError($this->path, $process->getErrorOutput(), $cmd);
         }
     }
@@ -212,7 +219,7 @@ class Camelot
 
     protected function throwError($path, string $getErrorOutput, string $cmd)
     {
-        if(strpos($getErrorOutput, 'file has not been decrypted') > -1) {
+        if (strpos($getErrorOutput, 'file has not been decrypted') > -1) {
             throw new PdfEncryptedException($path);
         }
 
@@ -221,7 +228,7 @@ class Camelot
 
     public function processBackgroundLines()
     {
-        if($this->mode !== static::MODE_LATTICE) {
+        if ($this->mode !== static::MODE_LATTICE) {
             throw new BackgroundLinesNotSupportedException($this->mode);
         }
 
@@ -249,6 +256,17 @@ class Camelot
     public function inRegions(Areas $regions)
     {
         $this->regions = $regions;
+
+        return $this;
+    }
+
+    public function setColumnSeparators(...$xCoords)
+    {
+        if ($this->mode !== static::MODE_STREAM) {
+            throw new ColumnSeparatorsNotSupportedException($this->mode);
+        }
+
+        $this->columnSeparators = $xCoords;
 
         return $this;
     }

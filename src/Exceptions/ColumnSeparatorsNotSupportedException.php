@@ -6,18 +6,18 @@ namespace RandomState\Camelot\Exceptions;
 
 use RandomState\Camelot\Camelot;
 
-class BackgroundLinesNotSupportedException extends NotSupportedException
+class ColumnSeparatorsNotSupportedException extends NotSupportedException
 {
     protected function validModes(): array
     {
         return [
-            Camelot::MODE_LATTICE,
+            Camelot::MODE_STREAM,
         ];
     }
 
     protected function featureName(): string
     {
-        return "processing background lines";
+        return "column separators";
     }
 
 }
