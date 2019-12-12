@@ -82,4 +82,20 @@ class AdvancedProcessingTest extends TestCase
         $this->assertEquals('NUMBER', $csv->getHeader()[0]);
         $this->assertEquals('TYPE', $csv->getHeader()[1]);
     }
+
+    /**
+     * @test
+     */
+    public function flag_superscripts_and_subscripts()
+    {
+        $tables = Camelot::stream($this->file('superscript.pdf'))
+            ->flagSize()
+            ->extract();
+
+        $this->assertCount(1, $tables);
+        $csv = $this->csvFromString($tables[0]);
+
+        $this->assertStringContainsString('<s>', $csv->fetchOne(18)[2]);
+        $this->assertStringContainsString('</s>', $csv->fetchOne(18)[2]);
+    }
 }
