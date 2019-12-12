@@ -69,6 +69,11 @@ class Camelot
      */
     protected $columnSeparators;
 
+    /**
+     * @var bool
+     */
+    protected $splitAlongSeparators;
+
     public function __construct($path, $mode = null)
     {
         $this->path = $path;
@@ -148,13 +153,14 @@ class Camelot
         // Advanced options
         $background = $this->processBackgroundLines ? " --process_background " : "";
         $plot = $this->plot ? " -plot {$this->plot}" : "";
+        $split = ($this->splitAlongSeparators && $this->columnSeparators) ? " -split" : "";
         $columnSeparators = $this->columnSeparators ? " -C " . implode(",",$this->columnSeparators) : "";
 
         // Table areas/regions
         $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
         $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$mode}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$split}{$mode}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
 
         $process = Process::fromShellCommandline($cmd);
         $process->run();
@@ -260,13 +266,14 @@ class Camelot
         return $this;
     }
 
-    public function setColumnSeparators(...$xCoords)
+    public function setColumnSeparators(array $xCoords, $split = false)
     {
         if ($this->mode !== static::MODE_STREAM) {
             throw new ColumnSeparatorsNotSupportedException($this->mode);
         }
 
         $this->columnSeparators = $xCoords;
+        $this->splitAlongSeparators = $split;
 
         return $this;
     }

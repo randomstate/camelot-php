@@ -45,7 +45,7 @@ class AdvancedProcessingTest extends TestCase
     public function set_column_separators() 
     {
         $tables = Camelot::stream($this->file('column_separators.pdf'))
-            ->setColumnSeparators(72,95,209,327,442,529,566,606,683)
+            ->setColumnSeparators([72,95,209,327,442,529,566,606,683])
             ->extract();
 
         $this->assertCount(1, $tables);
@@ -63,7 +63,23 @@ class AdvancedProcessingTest extends TestCase
         $this->expectException(ColumnSeparatorsNotSupportedException::class);
 
         Camelot::lattice($this->file('column_separators.pdf'))
-            ->setColumnSeparators(72,95,209,327,442,529,566,606,683)
+            ->setColumnSeparators([72,95,209,327,442,529,566,606,683])
             ->extract();
+    }
+
+    /**
+     * @test
+     */
+    public function enable_split_text_along_separators()
+    {
+        $tables = Camelot::stream($this->file('column_separators.pdf'))
+            ->setColumnSeparators([72,95,209,327,442,529,566,606,683], true)
+            ->extract();
+
+        $this->assertCount(1, $tables);
+        $csv = $this->csvFromString($tables[0]);
+        $csv->setHeaderOffset(4);
+        $this->assertEquals('NUMBER', $csv->getHeader()[0]);
+        $this->assertEquals('TYPE', $csv->getHeader()[1]);
     }
 }
