@@ -161,4 +161,41 @@ class AdvancedProcessingTest extends TestCase
         $this->assertEquals('RelativePrecision', $csv->getHeader()[5]);
         $this->assertEquals('Sample sizeper State', $csv->getHeader()[6]);
     }
+
+    /**
+     * @test
+     */
+    public function can_set_text_shift_in_spanning_cells()
+    {
+        $tables = Camelot::lattice($this->file('short_lines.pdf'))
+            ->strip("-\n")
+            ->setLineScale(40)
+            ->shiftText('r', 'b')
+            ->extract();
+
+        $this->assertCount(1, $tables);
+        $csv = $this->csvFromString($tables[0]);
+
+        $row = $csv->fetchOne(3);
+        $this->assertEquals(2400, $row[1]);
+    }
+    
+    /**
+     * @test
+     */
+    public function can_copy_text_in_spanning_cells() 
+    {
+        $tables = Camelot::lattice($this->file('copy_text.pdf'))
+            ->copyTextSpanningCells('v')
+            ->extract();
+
+        $this->assertCount(1, $tables);
+        $csv = $this->csvFromString($tables[0]);
+
+        $this->assertEquals(4, $csv->fetchOne(4)[0]);
+        $this->assertEquals('West Bengal', $csv->fetchOne(4)[1]);
+
+        $this->assertEquals(4, $csv->fetchOne(5)[0]);
+        $this->assertEquals('West Bengal', $csv->fetchOne(5)[1]);
+    }
 }
