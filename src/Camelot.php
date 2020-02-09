@@ -180,7 +180,7 @@ class Camelot
 
     protected function runCommand($outputPath = null)
     {
-        $output = $outputPath ? " --output $outputPath" : "";
+        $output = $outputPath ? " --output '$outputPath'" : "";
         $mode = " {$this->mode}";
         $pages = $this->pages ? " --pages {$this->pages}" : "";
         $password = $this->password ? " --password {$this->password}" : "";
@@ -202,7 +202,7 @@ class Camelot
         $areas = $this->areas ? $this->areas->toDelimitedString(" -T ") : "";
         $regions = $this->regions ? $this->regions->toDelimitedString(" -R ") : "";
 
-        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$textShift}{$copyText}{$lineScale}{$edgeTolerance}{$rowTolerance}{$background}{$plot}{$areas}{$regions}{$columnSeparators} " . $this->path;
+        $cmd = "camelot --format csv {$output}{$pages}{$password}{$flagSize}{$split}{$strip}{$mode}{$textShift}{$copyText}{$lineScale}{$edgeTolerance}{$rowTolerance}{$background}{$plot}{$areas}{$regions}{$columnSeparators} "."'$this->path'";
 
         $process = Process::fromShellCommandline($cmd);
         $process->run();
