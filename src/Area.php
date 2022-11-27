@@ -6,12 +6,12 @@ namespace RandomState\Camelot;
 
 class Area
 {
-    protected $xTopLeft;
-    protected $yTopLeft;
-    protected $xBottomRight;
-    protected $yBottomRight;
+    protected int $xTopLeft;
+    protected int $yTopLeft;
+    protected int $xBottomRight;
+    protected int $yBottomRight;
 
-    public function __construct($xTopLeft, $yTopLeft, $xBottomRight, $yBottomRight)
+    public function __construct(int $xTopLeft, int $yTopLeft, int $xBottomRight, int $yBottomRight)
     {
         $this->xTopLeft = $xTopLeft;
         $this->yTopLeft = $yTopLeft;
@@ -19,27 +19,27 @@ class Area
         $this->yBottomRight = $yBottomRight;
     }
 
-    public function xTopLeft()
+    public function xTopLeft(): int
     {
         return $this->xTopLeft;
     }
 
-    public function yTopLeft()
+    public function yTopLeft(): int
     {
         return $this->yTopLeft;
     }
 
-    public function xBottomRight()
+    public function xBottomRight(): int
     {
         return $this->xBottomRight;
     }
 
-    public function yBottomRight()
+    public function yBottomRight(): int
     {
         return $this->yBottomRight;
     }
 
-    public function coords()
+    public function coords(): string
     {
         return implode(',', [
             $this->xTopLeft,

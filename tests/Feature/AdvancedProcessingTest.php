@@ -109,7 +109,7 @@ class AdvancedProcessingTest extends TestCase
             ->extract();
 
         $csv = $this->csvFromString($tables[0]);
-        $this->assertEquals('Robbery', $csv->fetchOne(12)[0]);
+        $this->assertEquals('Robbery', $csv->fetchOne(11)[0]);
     }
 
     /**
