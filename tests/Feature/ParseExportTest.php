@@ -29,7 +29,7 @@ class ParseExportTest extends TestCase
             ->extract()[0];
 
         $csv = $this->csvFromString($tables);
-        $csv->setHeaderOffset(1);
+        $csv->setHeaderOffset(0);
 
         $this->assertCount(8, $header = $csv->getHeader());
         $this->assertEquals('States-A', $header[0]);
