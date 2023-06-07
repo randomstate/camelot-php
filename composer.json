@@ -1,5 +1,5 @@
 {
-  "name": "randomstate/camelot-php",
+  "name": "fagundes/camelot-php",
   "description": "PHP Wrapper library for interfacing with the Camelot PDF table extraction library built in Python",
   "type": "library",
   "authors": [
